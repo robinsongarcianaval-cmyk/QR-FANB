@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identificador Médico FANB</title>
+    <!-- Tailwind CSS para el diseño -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons para la iconografía -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Animación personalizada para el escáner */
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+        .animate-scan {
+            animation: scan 2s ease-in-out infinite;
+        }
+        /* Clase auxiliar para ocultar vistas */
+        .escondido {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800">
+
+    <!-- ================= VISTA 1: ESCÁNER ================= -->
+    <div id="vista-escaner" class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+            <!-- Encabezado Escudo -->
+            <div class="bg-gradient-to-b from-[#1a2f1c] to-[#2d4d30] p-8 text-center border-b-4 border-[#b49b57]">
+                <img 
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Escudo_de_la_Fuerza_Armada_Nacional_Bolivariana.svg/1200px-Escudo_de_la_Fuerza_Armada_Nacional_Bolivariana.svg.png" 
+                    alt="Escudo FANB" 
+                    class="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-lg opacity-90"
+                    onerror="this.style.display='none'"
+                />
+                <h1 class="text-2xl font-bold text-white uppercase tracking-wider">Sistema de Identidad</h1>
+                <h2 class="text-[#d4c38d] font-medium text-sm mt-1 uppercase tracking-widest">Sanidad Militar FANB</h2>
+            </div>
+            
+            <!-- Zona de Escaneo -->
+            <div class="p-8 flex flex-col items-center">
+                <div class="relative mb-8">
+                    <div class="absolute inset-0 bg-green-500 rounded-xl blur opacity-20 animate-pulse"></div>
+                    <div class="relative bg-slate-50 p-6 rounded-xl border-2 border-dashed border-[#2d4d30] overflow-hidden">
+                        <i data-lucide="qr-code" class="text-[#1a2f1c] w-32 h-32"></i>
+                        <div class="absolute top-0 left-0 w-full h-1 bg-red-500 animate-scan shadow-[0_0_10px_red]"></div>
+                    </div>
+                </div>
+                
+                <p class="text-slate-600 text-center mb-8 font-medium">
+                    Posicione el código QR de la chapa sanguínea dentro del marco para escanear los datos del profesional.
+                </p>
+                
+                <button 
+                    onclick="escanear()"
+                    class="w-full bg-[#1a2f1c] hover:bg-[#2d4d30] text-white font-bold py-4 px-6 rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-3 border border-[#b49b57]"
+                >
+                    <i data-lucide="qr-code" class="text-[#b49b57] w-6 h-6"></i>
+                    ESCANEAR CHAPA SANGUÍNEA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= VISTA 2: PERFIL MÉDICO (Oculto por defecto) ================= -->
+    <div id="vista-perfil" class="escondido pb-10">
+        
+        <!-- Navbar Superior -->
+        <div class="bg-[#1a2f1c] text-white sticky top-0 z-50 shadow-md border-b-2 border-[#b49b57]">
+            <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+                <button onclick="volverEscaner()" class="flex items-center text-[#d4c38d] hover:text-white transition">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    <span class="font-medium hidden sm:inline ml-1">Volver</span>
+                </button>
+                <div class="font-bold text-center flex-1 uppercase tracking-wide text-sm sm:text-base">
+                    Expediente Médico
+                </div>
+                <div class="w-8"></div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+            
+            <!-- Tarjeta Principal del Perfil -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 border border-slate-200 relative">
+                <div class="h-24 sm:h-32 bg-gradient-to-r from-[#1a2f1c] to-[#3a5a3d]"></div>
+                <div class="px-6 pb-6 relative">
+                    <div class="flex flex-col sm:flex-row items-center sm:items-end -mt-12 sm:-mt-16 mb-4 sm:mb-0 gap-4">
+                        <div class="relative">
+                            <div class="w-24 h-24 sm:w-32 sm:h-32 bg-slate-200 rounded-full border-4 border-white shadow-lg overflow-hidden flex items-center justify-center">
+                                <i data-lucide="user" class="text-slate-500 w-16 h-16"></i>
+                            </div>
+                            <div class="absolute bottom-1 right-1 bg-green-500 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-white shadow-sm"></div>
+                        </div>
+                        <div class="text-center sm:text-left flex-1 mt-2 sm:mt-0 sm:pb-2">
+                            <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                                <i data-lucide="medal" class="text-[#b49b57] w-5 h-5"></i>
+                                <span class="text-[#b49b57] font-bold uppercase tracking-wider text-sm">Teniente de Navío</span>
+                            </div>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                                Robinson José García López
+                            </h1>
+                            <p class="text-slate-500 font-medium text-sm mt-1">C.I: V-15.XXX.XXX • FANB Activo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Pestañas -->
+            <div class="bg-white rounded-xl shadow-md p-1 mb-6 flex flex-col sm:flex-row border border-slate-200">
+                <button 
+                    id="btn-tab-medicos"
+                    onclick="cambiarPestana('medicos')"
+                    class="flex-1 py-3 px-4 rounded-lg font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all bg-[#1a2f1c] text-white shadow"
+                >
+                    <i data-lucide="activity" class="w-5 h-5"></i>
+                    DATOS MÉDICOS
+                </button>
+                <button 
+                    id="btn-tab-profesionales"
+                    onclick="cambiarPestana('profesionales')"
+                    class="flex-1 py-3 px-4 rounded-lg font-bold text-sm sm:text-base flex items-center justify-center gap-2 transition-all mt-2 sm:mt-0 sm:ml-2 text-slate-500 hover:bg-slate-100"
+                >
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    DATOS PROFESIONALES
+                </button>
+            </div>
+
+            <!-- ================= CONTENIDO PESTAÑA 1: DATOS MÉDICOS ================= -->
+            <div id="tab-medicos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Alertas Críticas (Ocupan todo el ancho en móvil) -->
+                <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-red-50 border-l-4 border-red-600 p-5 rounded-r-xl shadow-sm flex items-start gap-4">
+                        <div class="bg-red-100 p-3 rounded-full text-red-600">
+                            <i data-lucide="droplet" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-red-800 uppercase tracking-wide">Grupo Sanguíneo</p>
+                            <p class="text-2xl font-bold text-red-700">O RH Positivo</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-5 rounded-r-xl shadow-sm flex items-start gap-4">
+                        <div class="bg-orange-100 p-3 rounded-full text-orange-600">
+                            <i data-lucide="alert-triangle" class="w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-orange-800 uppercase tracking-wide">Alergias Detectadas</p>
+                            <p class="text-lg font-bold text-orange-700 leading-tight">Alérgico a la Aspirina (Ácido Acetilsalicílico) y sus componentes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjetas de Información -->
+                <!-- Historial -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Historial Médico</p>
+                        <p class="font-medium text-sm sm:text-base">4532 - Hospital Universitario Dr. Carlos Arvelo</p>
+                    </div>
+                </div>
+
+                <!-- Quirúrgicas -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="activity" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Intervenciones Quirúrgicas</p>
+                        <p class="font-medium text-sm sm:text-base">Ninguna</p>
+                    </div>
+                </div>
+
+                <!-- Medicamentos -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="pill" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Medicamentos de Uso Diario</p>
+                        <p class="font-medium text-sm sm:text-base">Ninguno</p>
+                    </div>
+                </div>
+
+                <!-- COVID -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="thermometer" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Antecedentes de COVID-19</p>
+                        <p class="font-medium text-sm sm:text-base">Dos veces (Asintomático)</p>
+                    </div>
+                </div>
+
+                <!-- Contactos (Azul) -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow md:col-span-2">
+                    <div class="bg-blue-100 text-blue-600 p-3 rounded-lg h-fit">
+                        <i data-lucide="phone" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Contactos de Emergencia</p>
+                        <p class="font-medium text-sm sm:text-base">Familiar directo (Esposa) - Teléfono: <a href="tel:+584125555555" class="text-blue-600 hover:underline">+58 412-5555555</a></p>
+                    </div>
+                </div>
+
+                <!-- Seguro -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Seguro / Afiliación</p>
+                        <p class="font-medium text-sm sm:text-base">IPSFA - Afiliación Activa</p>
+                    </div>
+                </div>
+
+                <!-- Donante -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Donante de Órganos</p>
+                        <p class="font-medium text-sm sm:text-base">No posee</p>
+                    </div>
+                </div>
+
+                <!-- Vacunas -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="syringe" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Vacunas Recientes</p>
+                        <p class="font-medium text-sm sm:text-base">Fiebre Amarilla, Hepatitis B y Tétanos</p>
+                    </div>
+                </div>
+
+                <!-- Dispositivos -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="eye" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Dispositivos Médicos</p>
+                        <p class="font-medium text-sm sm:text-base">Ninguno (Usa lentes de contacto)</p>
+                    </div>
+                </div>
+
+                <!-- Voluntades -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow md:col-span-2">
+                    <div class="bg-green-100 text-[#1a2f1c] p-3 rounded-lg h-fit">
+                        <i data-lucide="stethoscope" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Voluntades Anticipadas</p>
+                        <p class="font-medium text-sm sm:text-base">Sin restricciones para maniobras de reanimación cardiopulmonar (RCP)</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= CONTENIDO PESTAÑA 2: DATOS PROFESIONALES ================= -->
+            <div id="tab-profesionales" class="escondido grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Datos Base -->
+                <div class="bg-slate-50 border-l-4 border-slate-600 p-5 rounded-r-xl shadow-sm flex items-start gap-4 md:col-span-2">
+                    <div class="bg-slate-200 p-3 rounded-full text-slate-700">
+                        <i data-lucide="anchor" class="w-7 h-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500 uppercase tracking-wide">Componente y Grado</p>
+                        <p class="text-xl font-bold text-slate-800">Armada Bolivariana - Teniente de Navío</p>
+                    </div>
+                </div>
+
+                <!-- Especialidad -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-slate-100 text-slate-600 p-3 rounded-lg h-fit">
+                        <i data-lucide="crosshair" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Especialidad</p>
+                        <p class="font-medium text-sm sm:text-base">Artillería Naval / Armamento</p>
+                    </div>
+                </div>
+
+                <!-- Tiempo de Servicio -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-slate-100 text-slate-600 p-3 rounded-lg h-fit">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiempo de Servicio</p>
+                        <p class="font-medium text-sm sm:text-base">12 años, 4 meses</p>
+                    </div>
+                </div>
+                
+                <!-- Destino Actual -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow md:col-span-2">
+                    <div class="bg-slate-100 text-slate-600 p-3 rounded-lg h-fit">
+                        <i data-lucide="map-pin" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Unidad / Destino Actual</p>
+                        <p class="font-medium text-sm sm:text-base">Base Naval CA. Agustín Armario (BNAR) - Puerto Cabello</p>
+                    </div>
+                </div>
+                
+                <!-- Estatus -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow md:col-span-2">
+                    <div class="bg-green-100 text-green-700 p-3 rounded-lg h-fit">
+                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-green-700 uppercase tracking-wider mb-1">Estatus Operativo</p>
+                        <p class="font-medium text-sm sm:text-base text-green-800">Apto para el servicio físico y de armas</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts para controlar el comportamiento y los íconos -->
+    <script>
+        // Inicializar los iconos de Lucide
+        lucide.createIcons();
+
+        // Referencias a los elementos HTML
+        const vistaEscaner = document.getElementById('vista-escaner');
+        const vistaPerfil = document.getElementById('vista-perfil');
+        const tabMedicos = document.getElementById('tab-medicos');
+        const tabProfesionales = document.getElementById('tab-profesionales');
+        const btnTabMedicos = document.getElementById('btn-tab-medicos');
+        const btnTabProfesionales = document.getElementById('btn-tab-profesionales');
+
+        // Función para simular el escaneo y mostrar el perfil
+        function escanear() {
+            vistaEscaner.classList.add('escondido');
+            vistaPerfil.classList.remove('escondido');
+            window.scrollTo(0, 0); // Ir arriba
+        }
+
+        // Función para volver al escáner inicial
+        function volverEscaner() {
+            vistaPerfil.classList.add('escondido');
+            vistaEscaner.classList.remove('escondido');
+            cambiarPestana('medicos'); // Reiniciar a la pestaña por defecto
+        }
+
+        // Función para alternar entre las pestañas
+        function cambiarPestana(pestana) {
+            // Estilos de activo/inactivo para los botones
+            const claseActiva = ['bg-[#1a2f1c]', 'text-white', 'shadow'];
+            const claseInactiva = ['text-slate-500', 'hover:bg-slate-100'];
+
+            if (pestana === 'medicos') {
+                // Mostrar Medicos, Ocultar Profesionales
+                tabMedicos.classList.remove('escondido');
+                tabProfesionales.classList.add('escondido');
+                
+                // Actualizar estilos de botones
+                btnTabMedicos.classList.add(...claseActiva);
+                btnTabMedicos.classList.remove(...claseInactiva);
+                btnTabProfesionales.classList.remove(...claseActiva);
+                btnTabProfesionales.classList.add(...claseInactiva);
+            } else {
+                // Mostrar Profesionales, Ocultar Medicos
+                tabProfesionales.classList.remove('escondido');
+                tabMedicos.classList.add('escondido');
+                
+                // Actualizar estilos de botones
+                btnTabProfesionales.classList.add(...claseActiva);
+                btnTabProfesionales.classList.remove(...claseInactiva);
+                btnTabMedicos.classList.remove(...claseActiva);
+                btnTabMedicos.classList.add(...claseInactiva);
+            }
+        }
+    </script>
+</body>
+</html>
