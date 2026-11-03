@@ -10,6 +10,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Librería para el escáner QR -->
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Librería jsPDF para generar el PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .escondido {
             display: none !important;
@@ -23,6 +25,24 @@
         }
         #reader video {
             border-radius: 0.5rem;
+        }
+        /* Animación de caída vertical para la gota de sangre */
+        @keyframes gotacaida {
+            0% {
+                transform: translateY(0px);
+                opacity: 1;
+            }
+            70% {
+                transform: translateY(6px);
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(0px);
+                opacity: 1;
+            }
+        }
+        .animar-gota {
+            animation: gotacaida 1.5s ease-in-out infinite;
         }
     </style>
 </head>
@@ -59,7 +79,7 @@
             <div class="relative z-10 flex flex-col items-center mt-6 text-center">
                 <p class="text-xs tracking-[0.2em] text-[#D4AF37] font-semibold mb-3">EXPEDIENTE MÉDICO</p>
                 
-                <!-- AQUÍ VA TU FOTO DE PERFIL -->
+                <!-- FOTO DE PERFIL -->
                 <div class="w-24 h-24 bg-slate-200 rounded-full border-4 border-[#D4AF37] shadow-lg mb-4 flex items-center justify-center overflow-hidden">
                     <img src="foto-perfil.jpg" alt="TN Robinson García" class="w-full h-full object-cover">
                 </div>
@@ -90,10 +110,9 @@
 
         <!-- Contenido Datos Médicos -->
         <div id="tab-medicos" class="p-6 space-y-4">
-            
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-red-50 p-4 rounded-xl border border-red-100 flex flex-col items-center justify-center text-center">
-                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2">
+                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2 animar-gota">
                         <i data-lucide="droplet" class="w-5 h-5"></i>
                     </div>
                     <p class="text-xs text-slate-500 font-semibold">GRUPO SANGUÍNEO</p>
@@ -143,15 +162,49 @@
                     </div>
                 </div>
 
-                <div class="flex gap-4 p-4 rounded-xl bg-green-50 border border-green-100">
-                    <div class="text-green-600 mt-1"><i data-lucide="phone-call" class="w-5 h-5"></i></div>
-                    <div>
-                        <p class="text-xs text-green-700 font-bold tracking-wide">CONTACTO DE EMERGENCIA</p>
-                        <p class="text-sm font-bold text-slate-800">Victoria Andrade (Esposa)</p>
-                        <a href="tel:+584125555555" class="text-green-600 font-bold text-lg inline-block mt-1">+58 412-5555555</a>
+                <!-- Botón de Emergencia 1: Esposa -->
+                <a href="tel:+584149019277" class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md transition-all transform active:scale-95 group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">Contacto de Emergencia (Esposa)</p>
+                            <p class="text-base font-extrabold tracking-tight">Victoria Andrade</p>
+                            <p class="text-xs text-emerald-100 font-mono">+58 414-9019277</p>
+                        </div>
                     </div>
-                </div>
+                    <div class="bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 backdrop-blur-sm">
+                        <span>Llamar</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </a>
+
+                <!-- Botón de Emergencia 2: Madre -->
+                <a href="tel:+584169291110" class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md transition-all transform active:scale-95 group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform">
+                            <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">Contacto de Emergencia (Madre)</p>
+                            <p class="text-base font-extrabold tracking-tight">Madre</p>
+                            <p class="text-xs text-emerald-100 font-mono">+58 416-9291110</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 backdrop-blur-sm">
+                        <span>Llamar</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </a>
             </div>
+
+            <!-- BOTÓN PARA DESCARGAR EXPEDIENTE EN PDF -->
+            <button onclick="descargarPDF()" class="w-full mt-4 flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm shadow-lg transition-all transform active:scale-95">
+                <i data-lucide="file-down" class="w-5 h-5"></i>
+                Descargar Expediente en PDF
+            </button>
+
             <div class="pb-8"></div>
         </div>
 
@@ -184,6 +237,27 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- MODAL DE CONTRASEÑA PERSONALIZADO -->
+    <div id="modal-password" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 escondido">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl transform transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2 text-[#2C3B2E]">
+                    <i data-lucide="lock" class="w-5 h-5"></i>
+                    <h3 class="font-bold text-lg">Acceso Restringido</h3>
+                </div>
+                <button onclick="cerrarModalPassword()" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">Ingrese la contraseña para ver los Datos Profesionales:</p>
+            <input type="password" id="input-password" class="w-full px-4 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C3B2E] mb-4 text-sm" placeholder="Contraseña...">
+            <div class="flex gap-2">
+                <button onclick="cerrarModalPassword()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button onclick="verificarPassword()" class="flex-1 bg-[#2C3B2E] hover:bg-[#1e281f] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Ingresar</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts de interactividad y escáner -->
@@ -219,11 +293,10 @@
             document.getElementById('pantalla-perfil').classList.add('escondido');
             document.getElementById('pantalla-escaner').classList.remove('escondido');
             document.getElementById('btn-iniciar-camara').classList.remove('escondido');
-            // Asegurarnos de que al volver, se muestre la pestaña médica por defecto
             cambiarPestana('medicos', true);
         }
 
-        // Función para cambiar de pestañas con sistema de contraseña
+        // Función para cambiar de pestañas
         function cambiarPestana(pestana, omitirClave = false) {
             const tabMedicos = document.getElementById('tab-medicos');
             const tabProfesionales = document.getElementById('tab-profesionales');
@@ -234,17 +307,11 @@
             const claseInactiva = ['border-transparent', 'text-slate-400'];
 
             if (pestana === 'profesionales') {
-                // Solicitar contraseña si no se está omitiendo (por defecto pide clave)
                 if (!omitirClave) {
-                    let claveIngresada = prompt("ACCESO RESTRINGIDO\nIngrese la contraseña para ver los Datos Profesionales:");
-                    
-                    if (claveIngresada !== "12345") {
-                        alert("Contraseña incorrecta. Acceso denegado.");
-                        return; // Detiene la función y no cambia la pestaña
-                    }
+                    abrirModalPassword();
+                    return;
                 }
 
-                // Si la clave es correcta (o se omite), mostrar profesionales
                 tabProfesionales.classList.remove('escondido');
                 tabMedicos.classList.add('escondido');
                 
@@ -253,15 +320,112 @@
                 btnTabMedicos.classList.remove(...claseActiva);
                 btnTabMedicos.classList.add(...claseInactiva);
             } else {
-                // Mostrar médicos (No requiere clave)
                 tabMedicos.classList.remove('escondido');
                 tabProfesionales.classList.add('escondido');
                 
                 btnTabMedicos.classList.add(...claseActiva);
-                btnTabMedicos.classList.remove(...claseInactiva);
+                btnTabMedicos.classList.remove(...claseInactival);
                 btnTabProfesionales.classList.remove(...claseActiva);
                 btnTabProfesionales.classList.add(...claseInactiva);
             }
+        }
+
+        // Funciones del Modal de Contraseña
+        function abrirModalPassword() {
+            const modal = document.getElementById('modal-password');
+            const input = document.getElementById('input-password');
+            modal.classList.remove('escondido');
+            input.value = '';
+            input.focus();
+            lucide.createIcons();
+        }
+
+        function cerrarModalPassword() {
+            document.getElementById('modal-password').classList.add('escondido');
+        }
+
+        function verificarPassword() {
+            const claveIngresada = document.getElementById('input-password').value;
+            
+            if (claveIngresada !== "12345") {
+                alert("Contraseña incorrecta. Acceso denegado.");
+                document.getElementById('input-password').value = '';
+                document.getElementById('input-password').focus();
+                return;
+            }
+
+            cerrarModalPassword();
+            cambiarPestana('profesionales', true);
+        }
+
+        // Función para generar y descargar el Expediente Médico en PDF
+        function descargarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Encabezado institucional
+            doc.setFillColor(44, 59, 46); // Color #2C3B2E
+            doc.rect(0, 0, 210, 35, "F");
+
+            doc.setTextColor(212, 175, 55); // Color dorado #D4AF37
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("REPUBLICA BOLIVARIANA DE VENEZUELA - MINISTERIO DE LA DEFENSA", 105, 12, { align: "center" });
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.text("EXPEDIENTE MEDICO - IDENTIFICADOR FANB", 105, 24, { align: "center" });
+
+            // Datos Personales
+            doc.setTextColor(40, 40, 40);
+            doc.setFontSize(16);
+            doc.text("Teniente de Navio Robinson Jose Garcia Lopez", 20, 50);
+            
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.text("C.I: V-21.071.687  |  Componente: Armada Bolivariana (FANB Activo)", 20, 58);
+
+            // Línea divisoria
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, 65, 190, 65);
+
+            // Información Médica
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(13);
+            doc.setTextColor(44, 59, 46);
+            doc.text("DATOS CLINICOS Y EMERGENCIA", 20, 78);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+
+            let y = 88;
+            const datos = [
+                { label: "Grupo Sanguíneo:", value: "O RH+" },
+                { label: "Afiliación:", value: "IPSFA" },
+                { label: "Alergias:", value: "Aspirina (Ácido Acetilsalicílico) y componentes" },
+                { label: "Vacunas Recientes:", value: "Fiebre Amarilla, Hepatitis B (Completo), Tétanos" },
+                { label: "Antecedentes COVID-19:", value: "Dos veces (Asintomático)" },
+                { label: "Voluntades Anticipadas:", value: "Sin restricciones para maniobras de reanimación (RCP)" },
+                { label: "Contacto 1 (Esposa):", value: "Victoria Andrade - Tel: +58 414-9019277" },
+                { label: "Contacto 2 (Madre):", value: "Madre - Tel: +58 416-9291110" }
+            ];
+
+            datos.forEach(item => {
+                doc.setFont("helvetica", "bold");
+                doc.text(item.label, 20, y);
+                doc.setFont("helvetica", "normal");
+                doc.text(item.value, 75, y);
+                y += 10;
+            });
+
+            // Pie de página
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text("Documento generado digitalmente desde el Sistema Médico FANB.", 105, 285, { align: "center" });
+
+            // Guardar archivo PDF
+            doc.save("Expediente_Medico_TN_Robinson_Garcia.pdf");
         }
     </script>
 </body>
