@@ -58,10 +58,12 @@
             <div class="absolute top-0 right-0 w-32 h-32 bg-green-700/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
             <div class="relative z-10 flex flex-col items-center mt-6 text-center">
                 <p class="text-xs tracking-[0.2em] text-[#D4AF37] font-semibold mb-3">EXPEDIENTE MÉDICO</p>
+                
+                <!-- AQUÍ VA TU FOTO DE PERFIL -->
                 <div class="w-24 h-24 bg-slate-200 rounded-full border-4 border-[#D4AF37] shadow-lg mb-4 flex items-center justify-center overflow-hidden">
-                    <!-- Ícono de usuario temporal -->
-                    <i data-lucide="user" class="w-12 h-12 text-slate-400"></i>
+                    <img src="foto-perfil.jpg" alt="TN Robinson García" class="w-full h-full object-cover">
                 </div>
+
                 <div class="flex items-center gap-2 text-[#D4AF37] mb-1">
                     <i data-lucide="shield" class="w-4 h-4"></i>
                     <span class="text-xs font-bold tracking-wider">TENIENTE DE NAVÍO</span>
@@ -69,7 +71,7 @@
                 <h1 class="text-2xl font-black tracking-tight leading-tight">Robinson José García<br>López</h1>
                 <p class="text-sm mt-2 text-slate-300 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    C.I: V-15.XXX.XXX - FANB Activo
+                    C.I: V-21.071.687 - FANB Activo
                 </p>
             </div>
         </div>
@@ -193,13 +195,8 @@
         let html5QrCode;
         
         function iniciarEscaner() {
-            // Ocultar botón, mostrar contenedor de cámara
             document.getElementById('btn-iniciar-camara').classList.add('escondido');
-            
-            // Instanciar el lector apuntando al div "reader"
             html5QrCode = new Html5Qrcode("reader");
-            
-            // Configurar para usar la cámara trasera preferiblemente
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
             
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
@@ -210,29 +207,24 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // Cuando lee un QR correctamente, detenemos la cámara
             html5QrCode.stop().then((ignore) => {
-                // Ocultamos la pantalla del escáner y mostramos el perfil
                 document.getElementById('pantalla-escaner').classList.add('escondido');
                 document.getElementById('pantalla-perfil').classList.remove('escondido');
-                
-                // NOTA: 'decodedText' contiene lo que dice el QR. 
-                // En una versión más avanzada, usaríamos este texto para buscar en una base de datos.
-                // Por ahora, simplemente mostramos el perfil que tenemos diseñado.
             }).catch((err) => {
                 console.log("Error al detener el escáner", err);
             });
         }
 
         function reiniciarEscaner() {
-            // Volver a la pantalla del escáner
             document.getElementById('pantalla-perfil').classList.add('escondido');
             document.getElementById('pantalla-escaner').classList.remove('escondido');
             document.getElementById('btn-iniciar-camara').classList.remove('escondido');
+            // Asegurarnos de que al volver, se muestre la pestaña médica por defecto
+            cambiarPestana('medicos', true);
         }
 
-        // Función para cambiar de pestañas en el perfil
-        function cambiarPestana(pestana) {
+        // Función para cambiar de pestañas con sistema de contraseña
+        function cambiarPestana(pestana, omitirClave = false) {
             const tabMedicos = document.getElementById('tab-medicos');
             const tabProfesionales = document.getElementById('tab-profesionales');
             const btnTabMedicos = document.getElementById('btn-medicos');
@@ -241,15 +233,18 @@
             const claseActiva = ['border-[#2C3B2E]', 'text-[#2C3B2E]'];
             const claseInactiva = ['border-transparent', 'text-slate-400'];
 
-            if (pestana === 'medicos') {
-                tabMedicos.classList.remove('escondido');
-                tabProfesionales.classList.add('escondido');
-                
-                btnTabMedicos.classList.add(...claseActiva);
-                btnTabMedicos.classList.remove(...claseInactiva);
-                btnTabProfesionales.classList.remove(...claseActiva);
-                btnTabProfesionales.classList.add(...claseInactiva);
-            } else {
+            if (pestana === 'profesionales') {
+                // Solicitar contraseña si no se está omitiendo (por defecto pide clave)
+                if (!omitirClave) {
+                    let claveIngresada = prompt("ACCESO RESTRINGIDO\nIngrese la contraseña para ver los Datos Profesionales:");
+                    
+                    if (claveIngresada !== "12345") {
+                        alert("Contraseña incorrecta. Acceso denegado.");
+                        return; // Detiene la función y no cambia la pestaña
+                    }
+                }
+
+                // Si la clave es correcta (o se omite), mostrar profesionales
                 tabProfesionales.classList.remove('escondido');
                 tabMedicos.classList.add('escondido');
                 
@@ -257,6 +252,15 @@
                 btnTabProfesionales.classList.remove(...claseInactiva);
                 btnTabMedicos.classList.remove(...claseActiva);
                 btnTabMedicos.classList.add(...claseInactiva);
+            } else {
+                // Mostrar médicos (No requiere clave)
+                tabMedicos.classList.remove('escondido');
+                tabProfesionales.classList.add('escondido');
+                
+                btnTabMedicos.classList.add(...claseActiva);
+                btnTabMedicos.classList.remove(...claseInactiva);
+                btnTabProfesionales.classList.remove(...claseActiva);
+                btnTabProfesionales.classList.add(...claseInactiva);
             }
         }
     </script>
