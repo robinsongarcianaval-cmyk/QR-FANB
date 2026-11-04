@@ -47,15 +47,71 @@
         .animar-gota {
             animation: gotacaida 1.5s ease-in-out infinite;
         }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .hud-pulse {
+            animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .hud-border {
+            box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.2);
+        }
+        /* Estilo para el Modo Visión Nocturna / Rojo Táctico */
+        body.night-vision {
+            background-color: #1a0000 !important;
+            color: #ffcccc !important;
+        }
+        body.night-vision .bg-white, 
+        body.night-vision .dark\:bg-slate-900, 
+        body.night-vision .dark\:bg-slate-800 {
+            background-color: #2b0000 !important;
+            color: #ffcccc !important;
+            border-color: #550000 !important;
+        }
+        body.night-vision .bg-slate-50, 
+        body.night-vision .dark\:bg-slate-950 {
+            background-color: #200000 !important;
+        }
+        body.night-vision .text-slate-800, 
+        body.night-vision .dark\:text-slate-100,
+        body.night-vision .text-slate-300 {
+            color: #ff9999 !important;
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 min-h-screen font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
-    <!-- BOTÓN DE MODO OSCURO / NORMAL -->
-    <button onclick="alternarModoOscuro()" class="fixed top-4 right-4 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-800 dark:text-yellow-400 p-2.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-110">
-        <i data-lucide="moon" id="icono-luna" class="w-5 h-5 dark:hidden"></i>
-        <i data-lucide="sun" id="icono-sol" class="w-5 h-5 hidden dark:block"></i>
-    </button>
+    <!-- SPLASH SCREEN MILITAR (PANTALLA DE CARGA INICIAL) -->
+    <div id="splash-screen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-center p-4 transition-opacity duration-700">
+        <div class="w-20 h-20 rounded-3xl bg-green-900/40 border-2 border-green-500/50 flex items-center justify-center mb-6 shadow-2xl animate-bounce">
+            <i data-lucide="shield" class="w-10 h-10 text-green-400"></i>
+        </div>
+        <h2 class="text-xs uppercase tracking-[0.3em] text-[#D4AF37] font-bold mb-2">Fuerza Armada Nacional Bolivariana</h2>
+        <h1 class="text-2xl font-black text-white tracking-tight mb-6">Sistema de Identificación Táctica</h1>
+        <div class="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="splash-bar" class="h-full bg-green-500 w-full animate-pulse"></div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN TOAST FLOTANTE -->
+    <div id="toast-notification" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-slate-800/95 text-white px-6 py-3 rounded-2xl shadow-2xl border border-slate-700 backdrop-blur-md flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-20px]">
+        <i id="toast-icon" data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+        <span id="toast-message" class="text-sm font-bold tracking-wide">Notificación</span>
+    </div>
+
+    <!-- CONTROLES FLOTANTES (MODO OSCURO Y MODO NOCTURNO TÁCTICO) -->
+    <div class="fixed top-4 right-4 z-40 flex items-center gap-2">
+        <!-- Botón Modo Visión Nocturna (Rojo Táctico) -->
+        <button onclick="alternarModoNocturno()" title="Modo Visión Nocturna" class="bg-red-950/80 text-red-400 hover:bg-red-900 p-2.5 rounded-full shadow-lg border border-red-800 transition-all hover:scale-110">
+            <i data-lucide="eye" class="w-5 h-5"></i>
+        </button>
+        <!-- Botón Modo Oscuro / Normal -->
+        <button onclick="alternarModoOscuro()" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-800 dark:text-yellow-400 p-2.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-110">
+            <i data-lucide="moon" id="icono-luna" class="w-5 h-5 dark:hidden"></i>
+            <i data-lucide="sun" id="icono-sol" class="w-5 h-5 hidden dark:block"></i>
+        </button>
+    </div>
 
     <!-- PANTALLA 1: ESCÁNER QR CON FONDO DE IMAGEN -->
     <div id="pantalla-escaner" class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden bg-cover bg-center" style="background-image: url('fondo.jpg');">
@@ -84,28 +140,35 @@
     <!-- PANTALLA 2: EXPEDIENTE -->
     <div id="pantalla-perfil" class="max-w-md mx-auto bg-white dark:bg-slate-900 min-h-screen shadow-lg relative escondido transition-colors duration-300">
         
-        <!-- Encabezado Militar -->
+        <!-- Encabezado Militar con Carnet Táctico y Sello Dinámico de Verificación -->
         <div class="bg-[#2C3B2E] dark:bg-slate-800 text-white p-6 rounded-b-3xl shadow-md relative overflow-hidden transition-colors duration-300">
-            <button onclick="reiniciarEscaner()" class="absolute top-4 left-4 text-slate-300 hover:text-white flex items-center gap-1 text-sm font-medium">
+            <button onclick="reiniciarEscaner()" class="absolute top-4 left-4 text-slate-300 hover:text-white flex items-center gap-1 text-sm font-medium z-20">
                 <i data-lucide="chevron-left" class="w-4 h-4"></i> Volver
             </button>
             <div class="absolute top-0 right-0 w-32 h-32 bg-green-700/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
-            <div class="relative z-10 flex flex-col items-center mt-6 text-center">
-                <p class="text-xs tracking-[0.2em] text-[#D4AF37] font-semibold mb-3">EXPEDIENTE MÉDICO</p>
+            
+            <!-- TARJETA TIPO CARNET TÁCTICO CON INSIGNIA DINÁMICA -->
+            <div class="relative z-10 bg-gradient-to-r from-slate-900/80 to-[#2C3B2E]/90 border border-[#D4AF37]/50 rounded-2xl p-4 shadow-xl backdrop-blur-md mt-8">
+                <!-- INSIGNIA / BADGE DINÁMICO DE VERIFICACIÓN -->
+                <div class="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/40 px-2 py-0.5 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    <span class="text-[8px] font-mono tracking-wider text-green-300 uppercase font-bold">VERIFICADO MPPD</span>
+                </div>
                 
-                <div class="w-24 h-24 bg-slate-200 rounded-full border-4 border-[#D4AF37] shadow-lg mb-4 flex items-center justify-center overflow-hidden">
-                    <img src="foto-perfil.jpg" alt="TN Robinson García" class="w-full h-full object-cover">
+                <div class="flex items-center gap-4 mt-2">
+                    <div class="w-20 h-20 bg-slate-200 rounded-xl border-2 border-[#D4AF37] shadow-lg flex items-center justify-center overflow-hidden shrink-0">
+                        <img src="foto-perfil.jpg" alt="TN Robinson García" class="w-full h-full object-cover">
+                    </div>
+                    <div class="text-left overflow-hidden">
+                        <p class="text-[9px] tracking-[0.2em] text-[#D4AF37] font-extrabold mb-1">EXPEDIENTE MÉDICO</p>
+                        <h1 class="text-lg font-black tracking-tight leading-tight truncate">Robinson José García</h1>
+                        <div class="flex items-center gap-1.5 text-[#D4AF37] mt-1">
+                            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                            <span class="text-[10px] font-bold tracking-wider">TENIENTE DE NAVÍO</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1 font-mono">C.I: V-21.071.687</p>
+                    </div>
                 </div>
-
-                <div class="flex items-center gap-2 text-[#D4AF37] mb-1">
-                    <i data-lucide="shield" class="w-4 h-4"></i>
-                    <span class="text-xs font-bold tracking-wider">TENIENTE DE NAVÍO</span>
-                </div>
-                <h1 class="text-2xl font-black tracking-tight leading-tight">Robinson José García<br>López</h1>
-                <p class="text-sm mt-2 text-slate-300 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    C.I: V-21.071.687 - FANB Activo
-                </p>
             </div>
         </div>
 
@@ -123,8 +186,69 @@
 
         <!-- Contenido Datos Médicos -->
         <div id="tab-medicos" class="p-6 space-y-4">
+            
+            <!-- BOTÓN SOS DE EMERGENCIA CON GEOLOCALIZACIÓN (EXCLUSIVO 1ER CONTACTO) -->
+            <div class="bg-red-950/40 dark:bg-red-900/20 border-2 border-red-600/50 rounded-2xl p-4 shadow-lg text-center relative overflow-hidden">
+                <div class="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 font-black text-sm mb-1">
+                    <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
+                    <span>ALERTA TÁCTICA DE EMERGENCIA SOS</span>
+                </div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-300 mb-3">
+                    Envía coordenadas GPS actuales <span class="font-bold text-red-600 dark:text-red-400">únicamente al primer contacto principal (Esposa: Victoria Andrade)</span>.
+                </p>
+                <button onclick="enviarAlertaSOS()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider transform active:scale-95">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    Enviar Ubicación GPS (SOS)
+                </button>
+            </div>
+
+            <!-- PANEL HUD DE ESTADÍSTICAS VITALES -->
+            <div class="bg-slate-900 text-green-400 rounded-2xl p-4 border border-green-500/30 shadow-lg relative overflow-hidden hud-border">
+                <div class="absolute top-2 right-2 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-[8px] font-mono uppercase tracking-widest text-green-300">HUD TACTICAL v2.6</span>
+                </div>
+                <p class="text-[10px] uppercase font-mono text-slate-400 tracking-widest mb-3">EVALUACIÓN DE ESTADO BIOMÉTRICO</p>
+                
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs font-mono mb-1">
+                            <span class="text-slate-300">ESTADO CLÍNICO</span>
+                            <span class="text-green-400 font-bold">100% OPERATIVO</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-green-500/20">
+                            <div class="h-full bg-gradient-to-r from-green-600 to-emerald-400 rounded-full w-full"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-mono mb-1">
+                            <span class="text-slate-300">INMUNIZACIÓN Y VACUNAS</span>
+                            <span class="text-cyan-400 font-bold">AL DÍA (4/4)</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-cyan-500/20">
+                            <div class="h-full bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full w-full"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-mono mb-1">
+                            <span class="text-slate-300">EVALUACIÓN PSICOLÓGICA</span>
+                            <span class="text-purple-400 font-bold">APTO / CONTROL ANUAL</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-purple-500/20">
+                            <div class="h-full bg-gradient-to-r from-purple-600 to-indigo-400 rounded-full w-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TARJETAS DE DATOS MÉDICOS -->
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-red-50 dark:bg-red-950/30 p-4 rounded-xl border border-red-100 dark:border-red-900/50 flex flex-col items-center justify-center text-center">
+                <div class="bg-red-50 dark:bg-red-950/30 p-4 rounded-xl border border-red-100 dark:border-red-900/50 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-red-600">
+                        <i data-lucide="droplet" class="w-20 h-20"></i>
+                    </div>
                     <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 flex items-center justify-center mb-2 animar-gota">
                         <i data-lucide="droplet" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
                     </div>
@@ -132,12 +256,15 @@
                     <p class="text-lg font-black text-red-700 dark:text-red-400">O RH+</p>
                 </div>
 
-                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-slate-500">
+                        <i data-lucide="hospital" class="w-20 h-20"></i>
+                    </div>
                     <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center mb-2">
                         <i data-lucide="hospital" class="w-5 h-5"></i>
                     </div>
                     <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">AFILIACIÓN</p>
-                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200">IPSFA / Seguros Horizonte</p>
+                    <p class="text-sm font-bold text-slate-700 dark:text-slate-200">IPSFA / Seguros</p>
                 </div>
             </div>
 
@@ -190,7 +317,6 @@
                     </div>
                 </div>
 
-                <!-- Cirugías previas con icono corregido -->
                 <div class="flex gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                     <div class="text-indigo-500 mt-1"><i data-lucide="activity" class="w-5 h-5"></i></div>
                     <div>
@@ -231,14 +357,14 @@
                     </div>
                 </div>
 
-                <!-- Botón de Emergencia 1: Esposa -->
+                <!-- Botón de Emergencia 1: Esposa (Principal para SOS) -->
                 <a href="tel:+584149019277" class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md transition-all transform active:scale-95 group">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform">
                             <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">Contacto de Emergencia (Esposa)</p>
+                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">1er Contacto (Esposa / Destino SOS)</p>
                             <p class="text-base font-extrabold tracking-tight">Victoria Andrade</p>
                             <p class="text-xs text-emerald-100 font-mono">+58 414-9019277</p>
                         </div>
@@ -407,6 +533,96 @@
     <script>
         lucide.createIcons();
 
+        // Ocultar Splash Screen tras 1.2 segundos automáticamente
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.remove(), 700);
+            }, 1200);
+        });
+
+        // Sistema de Notificaciones Toast Personalizadas
+        function mostrarToast(mensaje, tipo = 'exito') {
+            const toast = document.getElementById('toast-notification');
+            const msg = document.getElementById('toast-message');
+            const icon = document.getElementById('toast-icon');
+
+            msg.textContent = mensaje;
+            if (tipo === 'error') {
+                icon.setAttribute('data-lucide', 'alert-circle');
+                icon.className = 'w-5 h-5 text-red-400';
+            } else {
+                icon.setAttribute('data-lucide', 'check-circle');
+                icon.className = 'w-5 h-5 text-green-400';
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+            }, 3000);
+        }
+
+        // Función para enviar Alerta SOS con Geolocalización solo al 1er Contacto (Victoria Andrade)
+        function enviarAlertaSOS() {
+            if (!navigator.geolocation) {
+                mostrarToast("La geolocalización no está soportada en este dispositivo.", "error");
+                return;
+            }
+
+            mostrarToast("Obteniendo coordenadas GPS de emergencia...");
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const mensaje = `¡ALERTA MÉDICA SOS! Requiero asistencia táctica urgente. Mis coordenadas GPS actuales son: https://maps.google.com/?q=${lat},${lon}`;
+                    const numeroEsposa = "+584149019277"; // Victoria Andrade (1er contacto)[cite: 1]
+
+                    // Abrir WhatsApp con el mensaje precargado al número de la esposa
+                    const urlWhatsApp = `https://wa.me/${numeroEsposa}?text=${encodeURIComponent(mensaje)}`;
+                    window.open(urlWhatsApp, '_blank');
+                    mostrarToast("¡Alerta SOS generada para Victoria Andrade!");
+                },
+                (error) => {
+                    mostrarToast("No se pudo obtener la ubicación GPS. Verifique permisos.", "error");
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
+        // Alternar Modo Visión Nocturna (Rojo Táctico)
+        function alternarModoNocturno() {
+            document.body.classList.toggle('night-vision');
+            if (document.body.classList.contains('night-vision')) {
+                mostrarToast("Modo Visión Nocturna activado");
+            } else {
+                mostrarToast("Modo Visión Nocturna desactivado");
+            }
+        }
+
+        // Reproducir pitido digital y vibración al escanear
+        function reproducirEfectoExito() {
+            if ("vibrate" in navigator) {
+                navigator.vibrate([100, 50, 100]);
+            }
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                console.log("Audio no soportado automáticamente sin interacción previa");
+            }
+        }
+
         let html5QrCode;
         
         function iniciarEscaner() {
@@ -416,15 +632,17 @@
             
             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
             .catch(err => {
-                alert("Error al iniciar la cámara. Asegúrese de dar permisos en el navegador.");
+                mostrarToast("Error al iniciar la cámara. Verifique permisos.", "error");
                 document.getElementById('btn-iniciar-camara').classList.remove('escondido');
             });
         }
 
         function onScanSuccess(decodedText, decodedResult) {
+            reproducirEfectoExito();
             html5QrCode.stop().then((ignore) => {
                 document.getElementById('pantalla-escaner').classList.add('escondido');
                 document.getElementById('pantalla-perfil').classList.remove('escondido');
+                mostrarToast("¡Expediente militar cargado con éxito!");
             }).catch((err) => {
                 console.log("Error al detener el escáner", err);
             });
@@ -487,13 +705,14 @@
             const claveIngresada = document.getElementById('input-password').value;
             
             if (claveIngresada !== "12345") {
-                alert("Contraseña incorrecta. Acceso denegado.");
+                mostrarToast("Contraseña incorrecta. Acceso denegado.", "error");
                 document.getElementById('input-password').value = '';
                 document.getElementById('input-password').focus();
                 return;
             }
 
             cerrarModalPassword();
+            mostrarToast("Acceso autorizado a datos profesionales.");
             cambiarPestana('profesionales', true);
         }
 
@@ -575,6 +794,7 @@
             doc.text("Documento generado digitalmente desde el Sistema Médico FANB.", 105, 290, { align: "center" });
 
             doc.save("Expediente_Medico_TN_Robinson_Garcia.pdf");
+            mostrarToast("Expediente exportado a PDF con éxito.");
         }
     </script>
 </body>
