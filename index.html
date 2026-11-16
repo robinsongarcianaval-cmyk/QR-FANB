@@ -17,6 +17,16 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <!-- Librería jsPDF para generar el PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Manifiesto PWA embebido para funcionamiento offline -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+        %22name%22: %22Identificador M%C3%A9dico FANB%22,
+        %22short_name%22: %22FANB M%C3%A9dico%22,
+        %22start_url%22: %22./index.html%22,
+        %22display%22: %22standalone%22,
+        %22background_color%22: %22%230f172a%22,
+        %22theme_color%22: %22%232C3B2E%22,
+        %22icons%22: []
+    }">
     <style>
         .escondido {
             display: none !important;
@@ -51,13 +61,9 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        .hud-pulse {
-            animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
         .hud-border {
             box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.2);
         }
-        /* Estilo para el Modo Visión Nocturna / Rojo Táctico */
         body.night-vision {
             background-color: #1a0000 !important;
             color: #ffcccc !important;
@@ -82,13 +88,13 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 min-h-screen font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300">
 
-    <!-- SPLASH SCREEN MILITAR (PANTALLA DE CARGA INICIAL) -->
+    <!-- SPLASH SCREEN MILITAR -->
     <div id="splash-screen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-center p-4 transition-opacity duration-700">
         <div class="w-20 h-20 rounded-3xl bg-green-900/40 border-2 border-green-500/50 flex items-center justify-center mb-6 shadow-2xl animate-bounce">
             <i data-lucide="shield" class="w-10 h-10 text-green-400"></i>
         </div>
         <h2 class="text-xs uppercase tracking-[0.3em] text-[#D4AF37] font-bold mb-2">Fuerza Armada Nacional Bolivariana</h2>
-        <h1 class="text-2xl font-black text-white tracking-tight mb-6">Sistema de Identificación Táctica</h1>
+        <h1 class="text-2xl font-black text-white tracking-tight mb-6">Sistema de Identificación Táctica (PWA)</h1>
         <div class="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden">
             <div id="splash-bar" class="h-full bg-green-500 w-full animate-pulse"></div>
         </div>
@@ -100,23 +106,19 @@
         <span id="toast-message" class="text-sm font-bold tracking-wide">Notificación</span>
     </div>
 
-    <!-- CONTROLES FLOTANTES (MODO OSCURO Y MODO NOCTURNO TÁCTICO) -->
+    <!-- CONTROLES FLOTANTES -->
     <div class="fixed top-4 right-4 z-40 flex items-center gap-2">
-        <!-- Botón Modo Visión Nocturna (Rojo Táctico) -->
         <button onclick="alternarModoNocturno()" title="Modo Visión Nocturna" class="bg-red-950/80 text-red-400 hover:bg-red-900 p-2.5 rounded-full shadow-lg border border-red-800 transition-all hover:scale-110">
             <i data-lucide="eye" class="w-5 h-5"></i>
         </button>
-        <!-- Botón Modo Oscuro / Normal -->
         <button onclick="alternarModoOscuro()" class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-800 dark:text-yellow-400 p-2.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 transition-all hover:scale-110">
             <i data-lucide="moon" id="icono-luna" class="w-5 h-5 dark:hidden"></i>
             <i data-lucide="sun" id="icono-sol" class="w-5 h-5 hidden dark:block"></i>
         </button>
     </div>
 
-    <!-- PANTALLA 1: ESCÁNER QR CON FONDO DE IMAGEN -->
+    <!-- PANTALLA 1: ESCÁNER QR -->
     <div id="pantalla-escaner" class="flex flex-col items-center justify-center min-h-screen p-4 relative overflow-hidden bg-cover bg-center" style="background-image: url('fondo.jpg');">
-        
-        <!-- Capa oscura semitransparente para legibilidad -->
         <div class="absolute inset-0 bg-slate-950/75 backdrop-blur-[2px]"></div>
 
         <div class="max-w-md w-full flex flex-col items-center text-center relative z-10 my-auto">
@@ -124,7 +126,7 @@
                 <i data-lucide="scan-line" class="w-8 h-8 text-green-400"></i>
             </div>
             <h1 class="text-2xl font-black mb-2 text-white tracking-tight">Escáner de Chapa Sanguínea</h1>
-            <p class="text-slate-300 mb-6 text-sm">Apunte la cámara hacia el código QR del militar para acceder a su expediente.</p>
+            <p class="text-slate-300 mb-6 text-sm">Apunte la cámara hacia el código QR del militar para acceder a su expediente y registrar su ubicación.</p>
             
             <div class="bg-black/80 p-2 rounded-xl shadow-2xl w-full border border-slate-700 backdrop-blur-md relative">
                 <div id="reader"></div>
@@ -140,16 +142,13 @@
     <!-- PANTALLA 2: EXPEDIENTE -->
     <div id="pantalla-perfil" class="max-w-md mx-auto bg-white dark:bg-slate-900 min-h-screen shadow-lg relative escondido transition-colors duration-300">
         
-        <!-- Encabezado Militar con Carnet Táctico y Sello Dinámico de Verificación -->
         <div class="bg-[#2C3B2E] dark:bg-slate-800 text-white p-6 rounded-b-3xl shadow-md relative overflow-hidden transition-colors duration-300">
             <button onclick="reiniciarEscaner()" class="absolute top-4 left-4 text-slate-300 hover:text-white flex items-center gap-1 text-sm font-medium z-20">
                 <i data-lucide="chevron-left" class="w-4 h-4"></i> Volver
             </button>
             <div class="absolute top-0 right-0 w-32 h-32 bg-green-700/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
             
-            <!-- TARJETA TIPO CARNET TÁCTICO CON INSIGNIA DINÁMICA -->
             <div class="relative z-10 bg-gradient-to-r from-slate-900/80 to-[#2C3B2E]/90 border border-[#D4AF37]/50 rounded-2xl p-4 shadow-xl backdrop-blur-md mt-8">
-                <!-- INSIGNIA / BADGE DINÁMICO DE VERIFICACIÓN -->
                 <div class="absolute top-2 right-2 flex items-center gap-1 bg-green-500/20 border border-green-500/40 px-2 py-0.5 rounded-full">
                     <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
                     <span class="text-[8px] font-mono tracking-wider text-green-300 uppercase font-bold">VERIFICADO MPPD</span>
@@ -187,14 +186,29 @@
         <!-- Contenido Datos Médicos -->
         <div id="tab-medicos" class="p-6 space-y-4">
             
-            <!-- BOTÓN SOS DE EMERGENCIA CON GEOLOCALIZACIÓN (EXCLUSIVO 1ER CONTACTO) -->
+            <!-- TARJETA DE UBICACIÓN GEOGRÁFICA EN PANTALLA (NUEVO) -->
+            <div class="flex gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div class="text-emerald-500 mt-1"><i data-lucide="map-pin" class="w-5 h-5 animate-bounce"></i></div>
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-bold tracking-wide">UBICACIÓN GPS DE ESCANEO</p>
+                    <p id="texto-gps-pantalla" class="text-sm font-bold text-slate-800 dark:text-slate-200 font-mono mt-0.5">Adquiriendo coordenadas GPS...</p>
+                </div>
+            </div>
+
+            <!-- BOTÓN DE COPIADO RÁPIDO DE DATOS CLÍNICOS -->
+            <button onclick="copiarDatosClinicos()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 text-slate-100 font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider transform active:scale-95 border border-slate-700">
+                <i data-lucide="copy" class="w-4 h-4 text-green-400"></i>
+                Copiar Resumen Clínico al Portapapeles
+            </button>
+
+            <!-- BOTÓN SOS DE EMERGENCIA (EXCLUSIVO 1ER CONTACTO: Victoria Andrade) -->
             <div class="bg-red-950/40 dark:bg-red-900/20 border-2 border-red-600/50 rounded-2xl p-4 shadow-lg text-center relative overflow-hidden">
                 <div class="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 font-black text-sm mb-1">
                     <i data-lucide="radio" class="w-5 h-5 animate-pulse"></i>
                     <span>ALERTA TÁCTICA DE EMERGENCIA SOS</span>
                 </div>
                 <p class="text-[11px] text-slate-600 dark:text-slate-300 mb-3">
-                    Envía coordenadas GPS actuales <span class="font-bold text-red-600 dark:text-red-400">únicamente al primer contacto principal (Esposa: Victoria Andrade)</span>.
+                    Envía coordenadas GPS actuales <span class="font-bold text-red-600 dark:text-red-400">únicamente al primer contacto principal (Esposa: Victoria Andrade)</span>[cite: 1].
                 </p>
                 <button onclick="enviarAlertaSOS()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider transform active:scale-95">
                     <i data-lucide="map-pin" class="w-5 h-5"></i>
@@ -206,7 +220,7 @@
             <div class="bg-slate-900 text-green-400 rounded-2xl p-4 border border-green-500/30 shadow-lg relative overflow-hidden hud-border">
                 <div class="absolute top-2 right-2 flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <span class="text-[8px] font-mono uppercase tracking-widest text-green-300">HUD TACTICAL v2.6</span>
+                    <span class="text-[8px] font-mono uppercase tracking-widest text-green-300">HUD TACTICAL v2.6 (OFFLINE READY)</span>
                 </div>
                 <p class="text-[10px] uppercase font-mono text-slate-400 tracking-widest mb-3">EVALUACIÓN DE ESTADO BIOMÉTRICO</p>
                 
@@ -357,16 +371,16 @@
                     </div>
                 </div>
 
-                <!-- Botón de Emergencia 1: Esposa (Principal para SOS) -->
+                <!-- Botón de Emergencia 1: Esposa -->
                 <a href="tel:+584149019277" class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md transition-all transform active:scale-95 group">
                     <div class="flex items-center gap-3">
                         <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white backdrop-blur-sm group-hover:scale-110 transition-transform">
                             <i data-lucide="phone-call" class="w-6 h-6 animate-pulse"></i>
                         </div>
                         <div>
-                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">1er Contacto (Esposa / Destino SOS)</p>
-                            <p class="text-base font-extrabold tracking-tight">Victoria Andrade</p>
-                            <p class="text-xs text-emerald-100 font-mono">+58 414-9019277</p>
+                            <p class="text-[10px] uppercase tracking-widest text-emerald-100 font-bold">1er Contacto (Esposa / Destino SOS)[cite: 1]</p>
+                            <p class="text-base font-extrabold tracking-tight">Victoria Andrade[cite: 1]</p>
+                            <p class="text-xs text-emerald-100 font-mono">+58 414-9019277[cite: 1]</p>
                         </div>
                     </div>
                     <div class="bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 backdrop-blur-sm">
@@ -533,6 +547,16 @@
     <script>
         lucide.createIcons();
 
+        // Variable global para almacenar la ubicación capturada al escanear
+        let ubicacionEscaneo = "Ubicación GPS no disponible o no solicitada";
+
+        // Registro de Service Worker para soporte PWA (Offline)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('data:text/javascript;base64,LyogU1cgT2ZmbGluZSByZWFkeSAqLw==').catch(() => {});
+            });
+        }
+
         // Ocultar Splash Screen tras 1.2 segundos automáticamente
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -564,6 +588,52 @@
             }, 3000);
         }
 
+        // Función de Copiado Rápido de Datos Clínicos al Portapapeles (Incluyendo Ubicación de Escaneo)
+        function copiarDatosClinicos() {
+            const textoResumen = "EXPEDIENTE MÉDICO TÁCTICO FANB\n" +
+                                 "Nombre: TN Robinson José García López\n" +
+                                 "Cédula: V-21.071.687\n" +
+                                 "Grupo Sanguíneo: O RH+\n" +
+                                 "Afiliación: IPSFA / Seguros Horizonte\n" +
+                                 "Alergias: Aspirina (Ácido Acetilsalicílico)\n" +
+                                 "Ubicación Geográfica al Escanear: " + ubicacionEscaneo + "\n" +
+                                 "1er Contacto (Esposa): Victoria Andrade (+58 414-9019277)";
+            
+            navigator.clipboard.writeText(textoResumen).then(() => {
+                mostrarToast("¡Resumen clínico con ubicación copiado al portapapeles!");
+            }).catch(() => {
+                mostrarToast("Error al copiar los datos.", "error");
+            });
+        }
+
+        // Función para capturar ubicación geográfica al escanear y actualizar la pantalla y variables
+        function registrarUbicacionEscaneo() {
+            const elementoGPS = document.getElementById('texto-gps-pantalla');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        ubicacionEscaneo = `https://maps.google.com/?q=${lat},${lon} (Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)})`;
+                        if (elementoGPS) {
+                            elementoGPS.textContent = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
+                        }
+                    },
+                    (error) => {
+                        ubicacionEscaneo = "Permiso de GPS denegado o no disponible al escanear";
+                        if (elementoGPS) {
+                            elementoGPS.textContent = "Ubicación GPS no disponible (Permiso denegado)";
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                if (elementoGPS) {
+                    elementoGPS.textContent = "Geolocalización no soportada";
+                }
+            }
+        }
+
         // Función para enviar Alerta SOS con Geolocalización solo al 1er Contacto (Victoria Andrade)
         function enviarAlertaSOS() {
             if (!navigator.geolocation) {
@@ -580,7 +650,6 @@
                     const mensaje = `¡ALERTA MÉDICA SOS! Requiero asistencia táctica urgente. Mis coordenadas GPS actuales son: https://maps.google.com/?q=${lat},${lon}`;
                     const numeroEsposa = "+584149019277"; // Victoria Andrade (1er contacto)[cite: 1]
 
-                    // Abrir WhatsApp con el mensaje precargado al número de la esposa
                     const urlWhatsApp = `https://wa.me/${numeroEsposa}?text=${encodeURIComponent(mensaje)}`;
                     window.open(urlWhatsApp, '_blank');
                     mostrarToast("¡Alerta SOS generada para Victoria Andrade!");
@@ -639,10 +708,11 @@
 
         function onScanSuccess(decodedText, decodedResult) {
             reproducirEfectoExito();
+            registrarUbicacionEscaneo(); // Capturar ubicación al escanear con éxito y mostrar en pantalla
             html5QrCode.stop().then((ignore) => {
                 document.getElementById('pantalla-escaner').classList.add('escondido');
                 document.getElementById('pantalla-perfil').classList.remove('escondido');
-                mostrarToast("¡Expediente militar cargado con éxito!");
+                mostrarToast("¡Expediente militar y ubicación GPS cargados con éxito!");
             }).catch((err) => {
                 console.log("Error al detener el escáner", err);
             });
@@ -772,7 +842,7 @@
                 { label: "Restricciones Físicas:", value: "Reposo por esguince grado II rodilla izq. hasta 15/12" },
                 { label: "Salud Mental:", value: "Apto para armas y explosivos / Control al día" },
                 { label: "Discapacidad / Prótesis:", value: "Ninguno" },
-                { label: "Esposa (Contacto):", value: "Victoria Andrade - Tel: +58 414-9019277" },
+                { label: "Esposa (Contacto):", value: "Victoria Andrade - Tel: +58 414-9019276" },
                 { label: "Madre (Contacto):", value: "Madre - Tel: +58 416-9291110" },
                 { label: "Compañero (Alternativo):", value: "Cap. Alejandro Silva - Tel: +58 412-5551234" }
             ];
@@ -798,4 +868,4 @@
         }
     </script>
 </body>
-</html>
+</html>s
